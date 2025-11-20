@@ -15,21 +15,42 @@ class AuthController extends Controller
     }
 
     public function login(Request $request){
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        $petugas = Petugas::where('username', $request->username)->first();
+        if($petugas && Hash::check($request->password, $petugas->password)){
+            session([
+                'id' => $petugas->id,
+                'nama' => $petugas->nama_petugas,
+                'level' => $petugas->level,
+                'role' => $petugas->level = 'admin' ? 'admin' : 'petugas',
+                'is_logged_in' => true
+            ]); 
+            return redirect()->route('dashboard');
+        }else{
+            return back()->with('error', 'Username atau Password salah!');
+        }
+
         $siswa = Siswa::where('nis', $request->username)->first();
 
         if($siswa && Hash::check($request->password, $siswa->password)){
-            Auth::login($siswa);
-            return redirect('dashboard');
+            session([
+                'nis' => $siswa->nis,
+                'nama' => $siswa->nama,
+                'role' => 'siswa',
+                'is_logged_in' => true
+            ]);
+            return redirect()->route('siswadashboard');
         }
-
-        $petugas = Petugas::where('username', $request->username)->first();
-
-        if($petugas && Hash::check($request->password, $petugas->password)){
-            Auth::login($petugas);
-            return redirect('dashboard');
-        }
-
         return back()->with('error', 'Username/NIS atau Password salah!');
+    }
+
+    public function logout(){
+        session()->flush();
+        return redirect()->route('login')->with('success', 'Berhasil logout.');
     }
 
 }

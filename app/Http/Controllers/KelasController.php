@@ -51,6 +51,6 @@ class KelasController extends Controller
         
         $kelas->delete();
 
-        return redirect()->route('kelas.index')->view('success', 'Data kelas berhasil dihapus.');
+        return redirect()->route('kelas.index')->with('success', 'Data kelas berhasil dihapus.');
     }
 }

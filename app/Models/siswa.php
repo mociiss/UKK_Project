@@ -10,19 +10,23 @@ use App\Models\Spp;
 class Siswa extends Authenticatable
 {
     protected $table = 'siswa';
+    protected $primaryKey = 'nisn';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'nisn',
         'nis',
         'nama',
-        'id_kelas',
+        'password',
+        'kelas_id',
         'alamat',
         'no_telp',
-        'id_spp'
+        'spp_id'
     ];
 
     public function kelas(){
-        return $this->belongsTo(Kelas::class, 'kelas_id');
+        return $this->belongsTo(Kelas::class);
     }
 
     public function spp(){
@@ -30,6 +34,6 @@ class Siswa extends Authenticatable
     }
 
     public function pembayaran(){
-        return $this->hasMany(Pembayaran::class, 'siswa_id');
+        return $this->hasMany(Pembayaran::class, 'nisn', 'nisn');
     }
 }

@@ -9,4 +9,9 @@ class DashboardController extends Controller
     public function index(){
         return view('dashboard');
     }
+
+    public function siswa(){
+        dd($roles);
+        return view('siswadashboard');
+    }
 }

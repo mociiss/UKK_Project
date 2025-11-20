@@ -48,19 +48,20 @@
         </style>
     </head>
     <body>
-        @if (session('error'))
-        <div style="color:red; margin-bottom:10px;">
-            {{ session('error') }}
-        </div>
-        @endif
 
         <div class="card">
             <h2>Login</h2>
             <form action="{{ route('login.post') }}" method="POST" autocomplete="off">
+                @csrf
                 <label for="">Username</label><br>
                 <input type="text" name="username" id="" required autocomplete="off" display="none"><br>
                 <label for="">Password</label><br>
                 <input type="password" name="password" id="" required autocomplete="off"><br>
+                @if (session('error'))
+                    <div style="color:red; margin-bottom:10px;">
+                        {{ session('error') }}
+                    </div>
+                @endif
                 <button type="submit">Masuk</button>
             </form>
         </div>

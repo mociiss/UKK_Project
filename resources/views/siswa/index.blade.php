@@ -8,7 +8,7 @@
 </head>
     <div class="container">
         <h2>Data Siswa</h2>
-        <a href="{{ route('siswa.store') }}">Tambah Data</a>
+        <a href="{{ route('siswa.create') }}" class="btn-add">Tambah Data</a>
 
         @if(session('success'))
         <div class="success">{{ session('success') }}</div>
@@ -24,6 +24,7 @@
                     <td>Kelas</td>
                     <td>Alamat</td>
                     <td>No Telp</td>
+                    <td>Tahun Angkatan</td>
                     <td>Aksi</td>
                 </tr>
             </thead>
@@ -38,9 +39,10 @@
                     <td>{{ $s->kelas->nama_kelas }}</td>
                     <td>{{ $s->alamat }}</td>
                     <td>{{ $s->no_telp }}</td>
+                    <td>{{ $s->spp->tahun }}</td>
                     <td>
-                        <a href="{{ route('siswa.edit', $s->id) }}" class="btn-edit">Edit</a>
-                        <form action="{{ route('siswa.destroy'), $s->id }}" method="POST" style="display: inline;">
+                        <a href="{{ route('siswa.edit', $s->nisn) }}" class="btn-edit">Edit</a>
+                        <form action="{{ route('siswa.destroy', $s->nisn) }}" method="POST" style="display: inline;">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn-hps" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
                         </form>

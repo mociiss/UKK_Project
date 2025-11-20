@@ -1,18 +1,19 @@
 @extends('layouts.app')
-@section('title', 'Aplikasi SPP - Tambah Data Kelas')
+@section('title', 'Aplikasi SPP - Edit Data Kelas')
 @section('content')
 <div class="section-container">
-    <h2>Tambah Data Kelas</h2>
-    <form action="{{ route('kelas.store') }}" method="POST" class="create-form">
+    <h2>Edit Data Kelas</h2>
+    <form action="{{ route('kelas.update', $kelas->id ) }}" method="POST" class="create-form">
         @csrf
+        @method('put')
         <div class="sec-body">
             <label for="">Nama Kelas</label>
-            <input type="text" name="nama_kelas" required>
+            <input type="text" name="nama_kelas" value="{{ $kelas->nama_kelas }}" required>
         </div>
         <div class="sec-body">
             <label for="">Kompetensi Keahlian</label>
             <select name="kompetensi_keahlian" id="" required>
-                <option value="">-- Pilih Kompetensi Keahlian --</option>
+                <option value="{{ $kelas->kompetensi_keahlian }}">{{ $kelas->kompetensi_keahlian }}</option>
                 <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
                 <option value="Teknik Elektronika Industri">Teknik Elektronika Industri</option>
                 <option value="Teknik Komputer dan Jaringan">Teknik Komputer dan Jaringan</option>
