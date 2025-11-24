@@ -7,8 +7,18 @@ use App\Models\Kelas;
 
 class KelasController extends Controller
 {
-    public function index(){
-        $kelas = Kelas::all();
+    public function index(Request $request){
+        $query = Kelas::query();
+
+        if($request->kompetensi_keahlian){
+            $query->where('kompetensi_keahlian', $request->kompetensi_keahlian);
+        }
+        if($request->search){
+            $query->where('nama_kelas', 'like', '%' . $request->search . '%');
+        }
+
+        $kelas = $query->orderBy('nama_kelas')->get();
+
         return view('kelas.index', compact('kelas'));
     }
 

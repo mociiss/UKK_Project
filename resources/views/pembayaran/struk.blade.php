@@ -3,126 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <title>Struk Pembayaran SPP - {{ $siswa->nama }}</title>
+
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
             font-size: 13px;
-            color: #2c3e50;
+            color: #333;
             margin: 25px 35px;
-            background-color: #fff;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 8px;
+            border-bottom: 2px solid #4a56a3;
+            padding-bottom: 6px;
         }
-
         .header h2 {
             margin: 0;
-            font-size: 20px;
-            color: #2980b9;
-            letter-spacing: 1px;
+            font-size: 17px;
+            color: #4a56a3;
         }
-
         .header p {
-            margin: 3px 0;
-            font-size: 12px;
-            color: #555;
-        }
-
-        .info {
-            margin-bottom: 18px;
-            line-height: 1.6;
-        }
-
-        .info p {
             margin: 2px 0;
+            font-size: 8px;
+        }
+
+        .container{
+            padding: 10px;
+            border-bottom: 2px solid #4a56a3;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-table td {
+            padding: 2px 0;
+            border: none;
+        }
+        .info-table td, .info-table th{
+            text-align: left;
+        }
+        .info-table .label {
+            width: 130px;
+            font-weight: bold;
+            color: #222;
+        }
+        .info-table .colon {
+            width: 10px;
+        }
+
+        .label{
+            font-weight: bold;
+            color: #222;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            border: 1px solid #ddd;
+            margin-top: 12px;
         }
-
         th {
-            background: #3498db;
+            background: #4a56a3;
             color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 12px;
         }
-
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px 6px;
-            text-align: center;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f8faff;
-        }
-
-        tr:hover {
-            background-color: #eef5fb;
+            border: none;
+            padding: 4px 0;
+            text-align: left;
         }
 
         .totals {
-            margin-top: 25px;
+            margin-top: 18px;
             text-align: right;
-            line-height: 1.8;
+            font-size: 14px;
+            padding-top: 10px;
+            border-top: 2px solid #4a56a3;
         }
-
         .totals strong {
-            color: #2c3e50;
+            font-size: 15px;
         }
 
         .footer {
-            margin-top: 35px;
+            margin-top: 28px;
             text-align: right;
-            font-size: 12px;
+            font-size: 11px;
             color: #555;
         }
 
         .thanks {
+            margin-top: 18px;
             text-align: center;
-            margin-top: 25px;
+            font-size: 12px;
             font-style: italic;
-            color: #555;
-        }
-
-        .highlight {
-            background: #eaf3fc;
-            border-radius: 6px;
-            padding: 3px 6px;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <h2>STRUK PEMBAYARAN SPP</h2>
-        <p>SMK TI PEMBANGUNAN CIMAHI</p>
-        <P>JL. H. BAKAR NO. 18 B / JL. CISEUPAN kOTA CIMAHI</P>
+        <h2>SMK TI PEMBANGUNAN CIMAHI</h2>
+        <p>JL. H. BAKAR NO. 18 B / JL. CISEUPAN, KOTA CIMAHI</p>
+        <p>Telp. +62 852-9393-9191 | Email : smktip_cimahi@yahoo.co.id</p>
     </div>
 
-    <div class="info">
-        <p><strong>Nama Siswa : </strong> <span class="highlight">{{ $siswa->nama }}</span></p>
-        <p><strong>NISN : </strong> {{ $siswa->nisn }}</p>
-        <p><strong>Kelas : </strong> {{ $siswa->kelas->nama_kelas }}</p>
-        <p><strong>Petugas : </strong> {{ $petugas }}</p>
-        <p><strong>Tanggal Bayar :</strong> {{ \Carbon\Carbon::parse($tanggalHariIni)->format('d F Y') }}</p>
+    <div class="container">
+    <table class="info-table">
+        <tr>
+            <td class="label">Nama Siswa</td>
+            <td class="colon">:</td>
+            <td>{{ $siswa->nama }}</td>
+        </tr>
+        <tr>
+            <td class="label">NISN</td>
+            <td class="colon">:</td>
+            <td>{{ $siswa->nisn }}</td>
+        </tr>
+        <tr>
+            <td class="label">Kelas</td>
+            <td class="colon">:</td>
+            <td>{{ $siswa->kelas->nama_kelas }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tahun SPP</td>
+            <td class="colon">:</td>
+            <td>{{ $tahun }}</td>
+        </tr>
+        <tr>
+            <td class="label">Nominal SPP</td>
+            <td class="colon">:</td>
+            <td>Rp {{ number_format($siswa->spp->nominal ?? 0, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td class="label">Petugas</td>
+            <td class="colon">:</td>
+            <td>{{ $petugas }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tanggal Bayar</td>
+            <td class="colon">:</td>
+            <td>{{ \Carbon\Carbon::parse($tanggalHariIni)->format('d F Y') }}</td>
+        </tr>
+    </table>
     </div>
 
+    <p class="label">Pembayaran SPP pada Bulan : </p>
     <table>
-        <thead>
-            <tr>
-                <th style="width:40px;">No</th>
-                <th>Bulan Dibayar</th>
-                <th>Jumlah Bayar</th>
-            </tr>
-        </thead>
         <tbody>
             @foreach ($pembayaran as $i => $p)
                 <tr>
@@ -135,12 +161,11 @@
     </table>
 
     <div class="totals">
-        <p><strong>Total Pembayaran SPP :</strong> Rp {{ number_format($totalHariIni, 0, ',', '.') }}</p>
+        <strong>Total Dibayar Hari Ini :</strong>
+        Rp {{ number_format($totalHariIni, 0, ',', '.') }}
     </div>
 
-    <div class="thanks">
-        Terima kasih telah melakukan pembayaran SPP.
-    </div>
+    <div class="thanks">Terima kasih telah melakukan pembayaran SPP.</div>
 
     <div class="footer">
         Dicetak oleh: <strong>{{ session('nama') }}</strong><br>

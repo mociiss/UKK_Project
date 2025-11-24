@@ -21,10 +21,10 @@
             <label for="">Kata Sandi</label>
             <input type="password" name="password" required>
         </div>
-        <div class="sec-body">
+        <!-- <div class="sec-body">
             <label for="">Konfirmasi Kata Sandi</label>
             <input type="password" name="password_confirmation" required>
-        </div>
+        </div> -->
         <div class="sec-body">
             <label for="">Kelas</label>
             <select name="kelas_id" id="" required>

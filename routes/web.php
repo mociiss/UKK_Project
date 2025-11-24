@@ -11,6 +11,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\LaporanController;
 use App\Models\Siswa;
 use App\Models\Pembayaran;
+use App\Http\Controllers\ActivityLogController;
 
 
 Route::get('/', function () {
@@ -19,12 +20,35 @@ Route::get('/', function () {
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/ganti-password', [UserController::class, 'gantiPassword'])->name('ganti.password');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/ganti-password', [AuthController::class, 'showChangePassword'])
+    ->middleware('checkRole:admin,petugas,siswa')
+    ->name('ganti.password');
+
+Route::post('/ganti-password', [AuthController::class, 'changePassword'])
+    ->middleware('checkRole:admin,petugas,siswa')
+    ->name('ganti.password.post');
+
+Route::resource('pembayaran', PembayaranController::class);
+Route::get('/pembayaran/cetak/{nisn}', [PembayaranController::class, 'cetakDetail'])->name('pembayaran.cetak');
+
     
-Route::middleware('checkRole:siswa')->get('/dashboard/siswa', function() {
-    return view('siswadashboard');
-})->name('siswadashboard');
+
+Route::get('/dashboard/siswa', [DashboardController::class, 'siswa'])
+    ->middleware('checkRole:siswa')
+    ->name('siswadashboard');
 Route::middleware('checkRole:petugas,admin')->get('/dashboard', function() {
-    return view('dashboard');
+    return view('dashboard', [
+        'totalSiswa' => 120,
+        'totalKelas' => 12,
+        'totalPetugas' => 5,
+        'totalPembayaran' => 25000000,
+        'pembayaranTerbaru' => collect(),
+        'labels' => [],
+        'totals' => [],
+        'bulan' => []
+    ]);
 })->name('dashboard');
 
 Route::middleware('checkRole:admin')->group(function(){
@@ -33,10 +57,8 @@ Route::middleware('checkRole:admin')->group(function(){
     Route::resource('spp', SppController::class);
     Route::resource('petugas', PetugasController::class);
     
-    Route::resource('pembayaran', PembayaranController::class);
     Route::get('/pembayaran/struk/{nisn}/{tahun}', [PembayaranController::class, 'cetakStruk'])->name('pembayaran.struk');
     Route::get('/pembayaran/preview/{nisn}/{tahun}', [PembayaranController::class, 'previewStruk'])->name('pembayaran.preview');
-    Route::get('/pembayaran/cetak/{nisn}', [PembayaranController::class, 'cetakDetail'])->name('pembayaran.cetak');
     Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/get-siswa/{nisn}', [PembayaranController::class, 'getSiswa']);
@@ -62,4 +84,7 @@ Route::middleware('checkRole:admin')->group(function(){
 
         return response()->json($result);
     });
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])
+    ->name('activity.log');
+
 });

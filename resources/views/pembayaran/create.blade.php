@@ -142,7 +142,6 @@
     <input type="hidden" name="tgl_bayar" value="{{ date('Y-m-d') }}">
 
     <div class="container-form">
-        {{-- CARD KIRI --}}
         <div class="card">
             <h4>Data Pembayaran</h4>
 
@@ -171,7 +170,6 @@
             <input type="number" name="tahun_dibayar" id="tahun" class="form-control" value="{{ date('Y') }}" readonly>
         </div>
 
-        {{-- CARD KANAN --}}
         <div class="card">
             <h4>Status Pembayaran Tahun Ini</h4>
             <div id="status_bulan" class="bulan-box"></div>
@@ -198,7 +196,6 @@ let nominal = 0;
 const kelas = document.getElementById('kelas');
 const siswa = document.getElementById('siswa');
 
-// ketika pilih kelas, ambil daftar siswa berdasarkan kelas
 kelas.onchange = () => {
     if (!kelas.value) return;
     fetch(`/get-siswa-by-kelas/${kelas.value}`)
@@ -211,7 +208,6 @@ kelas.onchange = () => {
         .catch(err => console.error('Gagal ambil siswa:', err));
 };
 
-// ketika pilih siswa, ambil data detail siswa dan status bulan
 siswa.onchange = () => {
     if (!siswa.value) return;
     fetch(`/get-siswa/${siswa.value}`)
@@ -228,17 +224,21 @@ siswa.onchange = () => {
         .catch(err => console.error('Gagal ambil data siswa:', err));
 };
 
-// fungsi untuk memuat status bulan (yang sudah dan belum dibayar)
 function loadStatus(nisn) {
     fetch(`/get-status-bulan/${nisn}`)
         .then(r => r.json())
         .then(data => {
+            const sortedData = data.sort((a, b) => {
+                const order = [7,8,9,10,11,12,1,2,3,4,5,6];
+                return order.indexOf(a.bulan) - order.indexOf(b.bulan);
+            });
+
             const statusBox = document.getElementById('status_bulan');
             const checkBox = document.getElementById('checkbox_bulan');
             statusBox.innerHTML = '';
             checkBox.innerHTML = '';
 
-            data.forEach(i => {
+            sortedData.forEach(i => {
                 statusBox.innerHTML += `<div class="bulan ${i.sudah ? 'sudah' : 'belum'}">${i.nama}</div>`;
                 if (!i.sudah) {
                     checkBox.innerHTML += `
@@ -252,7 +252,6 @@ function loadStatus(nisn) {
         .catch(err => console.error('Gagal ambil status bulan:', err));
 }
 
-// hitung total bayar dari jumlah bulan dipilih
 function calc() {
     const total = nominal * document.querySelectorAll('input[name="bulan_dibayar[]"]:checked').length;
     document.getElementById('total_bayar').value = "Rp " + total.toLocaleString();

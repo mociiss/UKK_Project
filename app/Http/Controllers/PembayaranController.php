@@ -6,31 +6,47 @@ use Illuminate\Http\Request;
 use App\Models\{Pembayaran, Petugas, Siswa, Kelas, Spp};
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class PembayaranController extends Controller
 {
+    use CausesActivity;
+    
+    public function logActivity()
+    {
+        $logs = Activity::orderBy('created_at', 'desc')->paginate(20);
+        return view('admin.log', compact('logs'));
+    }
+
     public function index(Request $request){
+        $role = session('role');
         $kelas = Kelas::all();
-        $siswa = $request->kelas 
-            ? Siswa::where('kelas_id', $request->kelas)->with('kelas')->get()
-            : Siswa::with('kelas')->get();
 
-        $siswaQuery = Siswa::with('kelas');
+        if ($role === 'siswa') {
+            $nisn = session('nis');
+            $siswa = Siswa::with(['kelas', 'spp'])->where('nisn', $nisn)->get();
+            $pembayaran = Pembayaran::where('nisn', $nisn)->get();
+        } else {
+            $siswaQuery = Siswa::with(['kelas', 'spp', 'pembayaran']);
+            if ($request->kelas) {
+                $siswaQuery->where('kelas_id', $request->kelas);
+            }
+            if ($request->tahun) {
+                $siswaQuery->whereHas('spp', fn($q) => $q->where('tahun', $request->tahun));
+            }
+            if ($request->search) {
+                $siswaQuery->where(function($q) use ($request) {
+                    $q->where('nama', 'like', '%' . $request->search . '%')
+                    ->orWhere('nisn', 'like', '%' . $request->search . '%');
+                });
+            }
 
-        if ($request->kelas) {
-            $siswaQuery->where('kelas_id', $request->kelas);
+            $siswa = $siswaQuery->get();
+            $pembayaran = Pembayaran::whereIn('nisn', $siswa->pluck('nisn'))->get();
         }
 
-        if ($request->search) {
-            $siswaQuery->where(function($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->search . '%')
-                ->orWhere('nisn', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $siswas = $siswaQuery->get();
-        $pembayaran = Pembayaran::with('siswa', 'spp')->get();
-        return view('pembayaran.index', compact('pembayaran', 'siswa', 'kelas', 'siswas'));
+        return view('pembayaran.index', compact('siswa', 'kelas', 'pembayaran'));
     }
 
     public function create(){
@@ -49,8 +65,9 @@ class PembayaranController extends Controller
 
         $siswa = Siswa::with('spp')->where('nisn', $r->nisn)->firstOrFail();
         $petugasId = session('id') ?? null;
+        $bulanIni = (int) date('n');
+        $tahun = $bulanIni >= 7 ? date('Y') : date('Y', strtotime('-1 year'));
         if(!$petugasId) return back()->with('error', 'Petugas belum login.');
-        $tahun = date('Y');
         foreach ($r->bulan_dibayar as $bulan) {
             Pembayaran::firstOrCreate([
                 'nisn' => $siswa->nisn,
@@ -83,21 +100,27 @@ class PembayaranController extends Controller
     }
 
     public function getStatusBulan($nisn) {
-        $yearNow = date('Y');
         $siswa = Siswa::with('spp')->where('nisn', $nisn)->firstOrFail();
+        $bulanSekarang = (int) date('n');
+        $tahunAjaran = $bulanSekarang >= 7 ? date('Y') : date('Y', strtotime('-1 year'));
 
-        $bulanSudahBayar = Pembayaran::where('nisn', $nisn)
-                            ->where('tahun_dibayar', $yearNow)
-                            ->pluck('bulan_dibayar')->toArray();
+        $pembayaran = Pembayaran::where('nisn', $nisn)->get();
 
-        $namaBulan = ["","Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+        $namaBulan = ["", "Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+        $urutanBulan = [7,8,9,10,11,12,1,2,3,4,5,6];
 
         $status = [];
-        for ($i=1;$i<=12;$i++) {
+        foreach ($urutanBulan as $b) {
+            $tahunPembayaran = $b >= 7 ? $tahunAjaran : $tahunAjaran + 1;
+            $sudahBayar = $pembayaran
+                ->where('bulan_dibayar', $b)
+                ->where('tahun_dibayar', $tahunPembayaran)
+                ->isNotEmpty();
+
             $status[] = [
-                'bulan' => $i,
-                'nama' => $namaBulan[$i],
-                'sudah' => in_array($i,$bulanSudahBayar)
+                'bulan' => $b,
+                'nama' => $namaBulan[$b],
+                'sudah' => $sudahBayar,
             ];
         }
 
@@ -112,7 +135,7 @@ class PembayaranController extends Controller
                         ->orderBy('bulan_dibayar')
                         ->get();
 
-        $bulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        $bulan = ["", "Juli", "Agustus", "September", "Oktober", "November", "Desember", "Januari", "Februari", "Maret", "April", "Mei", "Juni"];
 
         $pdf = PDF::loadView('pembayaran.cetak', compact('siswa', 'pembayaran', 'bulan')) ->setPaper('a4', 'portrait');
 
@@ -146,7 +169,7 @@ class PembayaranController extends Controller
 
         $pdf = Pdf::loadView('pembayaran.struk', compact(
             'siswa', 'pembayaran', 'bulanAll', 'totalHariIni', 'petugas', 'tahun', 'tanggalHariIni'
-        ))->setPaper('A5', 'portrait');
+        ))->setPaper([0,0,300,700], 'portrait');
 
         return $pdf->stream('Struk_Pembayaran_'.$siswa->nama.'.pdf');
     }

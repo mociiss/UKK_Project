@@ -8,11 +8,27 @@ use App\Models\Siswa;
 use App\Models\Kelas;
 use App\Models\Spp;
 
+
 class SiswaController extends Controller
 {
-    public function index(){
-        $siswa = Siswa::all();
-        return view('siswa.index', compact('siswa'));
+    public function index(Request $request){
+        $kelas = Kelas::all();
+        $siswaQuery = Siswa::with(['kelas', 'spp', 'pembayaran']);
+            if ($request->kelas) {
+                $siswaQuery->where('kelas_id', $request->kelas);
+            }
+            if ($request->tahun) {
+                $siswaQuery->whereHas('spp', fn($q) => $q->where('tahun', $request->tahun));
+            }
+            if ($request->search) {
+                $siswaQuery->where(function($q) use ($request) {
+                    $q->where('nama', 'like', '%' . $request->search . '%')
+                    ->orWhere('nisn', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            $siswa = $siswaQuery->get();
+            return view('siswa.index', compact('siswa', 'kelas'));
     }
 
     public function create(){
@@ -27,7 +43,7 @@ class SiswaController extends Controller
             'nisn' => 'required',
             'nis' => 'required',
             'nama' => 'required',
-            'password' => 'required|confirmed',
+            'password' => 'required',
             'kelas_id' => 'required|exists:kelas,id',
             'alamat' => 'required|string',
             'no_telp' => 'required',

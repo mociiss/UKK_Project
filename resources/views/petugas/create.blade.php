@@ -14,10 +14,6 @@
                 <input type="password" name="password" required>
             </div>
             <div class="sec-body">
-                <label for="">Konfirmasi Kata Sandi</label>
-                <input type="password" name="password_confirmation" required>
-            </div>
-            <div class="sec-body">
                 <label for="">Nama Petugas</label>
                 <input type="text" name="nama_petugas" required>
             </div>

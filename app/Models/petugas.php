@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class Petugas extends Authenticatable
 {
+    use CausesActivity;
     protected $table = 'petugas';
 
     protected $fillable = [
